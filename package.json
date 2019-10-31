@@ -4,7 +4,7 @@
 	"description": "Command Line Arguments Reader",
 	"main": "src/CAR.js",
 	"scripts": {
-		"test": ""
+		"lint": "eslint ."
 	},
 	"author": "Simao Nziaka",
 	"publishConfig": {
@@ -19,5 +19,9 @@
 	"bugs": {
 		"url": "https://github.com/verdebydesign/car/issues"
 	},
-	"homepage": "https://github.com/verdebydesign/car#readme"
+	"homepage": "https://github.com/verdebydesign/car#readme",
+	"devDependencies": {
+		"babel-eslint": "^10.0.3",
+		"eslint": "^6.6.0"
+	}
 }

@@ -1,0 +1,23 @@
+{
+	"name": "@verdebydesign/car",
+	"version": "0.0.1",
+	"description": "Command Line Arguments Reader",
+	"main": "src/CAR.js",
+	"scripts": {
+		"test": ""
+	},
+	"author": "Simao Nziaka",
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/",
+		"tag": "latest"
+	},
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/verdebydesign/car.git"
+	},
+	"bugs": {
+		"url": "https://github.com/verdebydesign/car/issues"
+	},
+	"homepage": "https://github.com/verdebydesign/car#readme"
+}

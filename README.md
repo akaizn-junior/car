@@ -46,6 +46,10 @@ the value after it to be its value. After validation CAR spits out ```-o``` as `
 by thei default value or just use the input value read. CAR will generate ```{ '-c': '<input-value>|<default>' }```
 Mixed flags allow for flags with different values, they are not always true.
 
+## Status
+
+[![Build Status](https://travis-ci.org/verdebydesign/car.svg?branch=master)](https://travis-ci.org/verdebydesign/car)
+
 ## License
 
 ISC License [ISC](https://opensource.org/licenses/ISC)

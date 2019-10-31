@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+    - "lts/*"
+
+cache:
+    directories:
+      - "node_modules"
+
+stages:
+    - lint
+
+jobs:
+    include:
+      - stage: lint
+        name: "Lint codebase"
+        script:
+          - npm run lint
+
+notifications:
+    email:
+      - sdnziaka@gmail.com

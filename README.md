@@ -6,7 +6,7 @@ Reads command line arguments and validates them based on a defined list
 
 ## Defined List
 
-CAR is a function that takes 3 arguments, two of those are optional.
+CAR takes 3 arguments, two of those are optional.
 The first one is a defined list used to match to arguments from the Terminal.
 
 ```js

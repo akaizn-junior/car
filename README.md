@@ -24,7 +24,8 @@ const arguments = CAR({
     default: 'chicken-wolf' // mixed flag
   },
   '-o': {
-    var: true // variable
+    var: true, // variable
+    help: o_help
   }
 });
 
@@ -35,16 +36,14 @@ console.log(arguments);
 
 ## Options
 
-- Flags. For example: ```command -h``` The argument ```-h``` is read and set as true by CAR.
-A key on the defined list defined as a flag is set to true when it's read from the console.
-Flags will always be true.
+- Flags. ```command -h``` The argument ```-h``` is read and set as true by CAR.
+A flag on the defined list will be set to true when it's read from the console.
+Flags are always true.
 
-- Vars. For example: ```command -o value``` The argument ```-o``` is defined as a var on the defined list, so CAR will expect
-the value after it to be its value. After validation CAR spits out ```-o``` as ```{'-o': 'value'}```
+- Vars. ```command -o value``` The argument ```-o``` is defined as a var on the defined list, so CAR will expect the value after it to be its value. After validation CAR generates ```-o``` as ```{'-o': 'value'}```
 
-- Vars with default or Mixed flags. ```command [ -c | -c=true | -c false ]``` CAR will read mixed flags as flags from the terminal and define them
-by thei default value or just use the input value read. CAR will generate ```{ '-c': '<input-value>|<default>' }```
-Mixed flags allow for flags with different values, they are not always true.
+- Vars with default or Mixed flags. ```command [ -c | -c=true | -c false ]``` Mixed flags can be read as just flags or vars depending if a value is provided or not. Mixed flags use their default value if no input is read. CAR will generate ```{ '-c': '<input-value>|<default>' }```
+Mixed flags allow flags to have different values, other than just ```true```.
 
 ## Status
 

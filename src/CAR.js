@@ -16,27 +16,27 @@ const { validate_args } = require('./helpers');
  * @example
  * const arguments = CAR({
  *	 '-h': {
- *	   flag: true,
- *     cb: () => { } // the function to call when this option is used
+ *		flag: true,
+ *		cb: () => { } // the function to call when this option is used
  *	 },
  *	 '-v': {
- *	   flag: true, // flag
- *     cb: () => { }
+ *		flag: true, // flag
+ *		cb: () => { }
  *	 },
  *	 '-c': {
- *	   var: true,
- *     cb: () => { },
- *	   default: 'chicken-wolf' // mixed flag
+ *		var: true,
+ *		cb: () => { },
+ *		default: 'chicken-wolf' // mixed flag
  *	 },
  *	 '-o': {
- *	   var: true, // variable
- *     cb: () => { },
- *     help: o_help,
- *     helpOption: 'h' // the user can defined their own help option value. However CAR allows the following ['help', '--help', '-h'] by default
+ *		var: true, // variable
+ *		cb: () => { },
+ *		help: o_help,
+ *		helpOption: 'h' // the user can defined their own help option value. However CAR allows the following ['help', '--help', '-h'] by default
  *   }
  * });
  */
-function CAR(defined, longform = {}, failed = () => {}) {
+function CAR(defined, longform = {}, failed = () => { }) {
 	return validate_args(
 		{ cmd_args: process.argv, defined, longform },
 		{ failed }

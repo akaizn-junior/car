@@ -230,8 +230,8 @@ function validate_args(args, callbacks) {
 					{ possible, default_value, helpOptionValue },
 					{ help, failed, success }
 				);
-				// skip the index of a possible value if 'var'
-				// is not assigned using OPERATOR.equal
+					// skip the index of a possible value if 'var'
+					// is not assigned using OPERATOR.equal
 				if (!result) {
 					!possible && i++;
 				} else {

@@ -33,7 +33,7 @@ const { validate_args } = require('./helpers');
  *		cb: () => { },
  *		help: o_help,
  *		helpOption: 'h' // the user can defined their own help option value. However CAR allows the following ['help', '--help', '-h'] by default
- *   }
+ *	 }
  * });
  */
 function CAR(defined, longform = {}, failed = () => { }) {

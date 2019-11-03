@@ -16,18 +16,24 @@ const { validate_args } = require('./helpers');
  * @example
  * const arguments = CAR({
  *	 '-h': {
- *	   flag: true
+ *	   flag: true,
+ *     cb: () => { } // the function to call when this option is used
  *	 },
  *	 '-v': {
- *	   flag: true // flag
+ *	   flag: true, // flag
+ *     cb: () => { }
  *	 },
  *	 '-c': {
  *	   var: true,
+ *     cb: () => { },
  *	   default: 'chicken-wolf' // mixed flag
  *	 },
  *	 '-o': {
- *	   var: true // variable
- *	 }
+ *	   var: true, // variable
+ *     cb: () => { },
+ *     help: o_help,
+ *     helpOption: 'h' // the user can defined their own help option value. However CAR allows the following ['help', '--help', '-h'] by default
+ *   }
  * });
  */
 function CAR(defined, longform = {}, failed = () => {}) {

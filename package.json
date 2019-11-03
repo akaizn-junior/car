@@ -4,7 +4,8 @@
 	"description": "Command Line Arguments Reader",
 	"main": "src/CAR.js",
 	"scripts": {
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"doc": "jsdoc src/CAR.js -c jsdoc.json --verbose"
 	},
 	"author": "Simao Nziaka",
 	"publishConfig": {
@@ -22,6 +23,8 @@
 	"homepage": "https://github.com/verdebydesign/car#readme",
 	"devDependencies": {
 		"babel-eslint": "^10.0.3",
-		"eslint": "^6.6.0"
+		"eslint": "^6.6.0",
+		"jsdoc": "^3.6.3",
+		"minami": "^1.2.3"
 	}
 }

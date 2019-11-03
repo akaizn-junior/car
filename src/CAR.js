@@ -14,16 +14,16 @@ const { validate_args } = require('./helpers');
  * @param {function} failed (err: string) => {} A callback for when validation fails for an argument or its value
  * @returns {object} A map of valid arguments
  * @example
- * const arguments = CAR({
- *	 '-h': {
+ * const defined = {
+ *	 '-f': {
  *		flag: true,
  *		cb: () => { } // the function to call when this option is used
  *	 },
  *	 '-v': {
- *		flag: true, // flag
+ *		var: true,
  *		cb: () => { }
  *	 },
- *	 '-c': {
+ *	 '-m': {
  *		var: true,
  *		cb: () => { },
  *		default: 'chicken-wolf' // mixed flag
@@ -34,7 +34,23 @@ const { validate_args } = require('./helpers');
  *		help: o_help,
  *		helpOption: 'h' // the user can defined their own help option value. However CAR allows the following ['help', '--help', '-h'] by default
  *	 }
+ * };
+ *
+ * const longform = {
+ *	'--flag': '-f',
+ *	'--var': '-v',
+ *	'--mixed': '-m',
+ *	'--other': '-o'
+ * }
+ *
+ * const validArgs = CAR(defined, longform, err => {
+ *  // only runs if validation fails
+ *	console.log(err);
  * });
+ *
+ * // Usage
+ * `command -f`
+ * // running a command with the '-f' option will run its callback
  */
 function CAR(defined, longform = {}, failed = () => { }) {
 	return validate_args(

@@ -28,7 +28,7 @@ const defined = {
 ## Long form list
 
 ```js
-const LONG_FROM = {
+const longform = {
     '--flag': '-f',
     '--mixed': '-m',
     '--combo': '-c',

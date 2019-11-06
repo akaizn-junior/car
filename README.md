@@ -61,6 +61,11 @@ Flags are always true.
 ```command [ -c | -c=true | -c false ]``` Mixed flags can be read as just flags or vars depending if a value is provided or not. Mixed flags use their default value if no input is read. CAR will generate ```{ '-c': '<input-value>|<default>' }```
 Mixed flags allow flags to have different values, other than just ```true```.
 
+### Values
+
+```command --arg <value>``` Values are validated and tested against the defined and longform list of arguments.
+CAR, exposes a ```validateValue``` function for input validation, CAR will continue or fail on the value validation.
+
 ### Option help
 
 ```command -a help``` More information about an option may be provided with the 'help' setting on the defined list. By default CAR will use the values 'help' | '--help' | '-h' to show help details for an option. However, the ```helpOption``` setting on the defined list may be used to define a specific value to show help. Additionally, CAR provides two ways to show help:

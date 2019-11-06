@@ -43,7 +43,7 @@ CAR reads 3 arguments, the defined list is the only required argument.
 ```js
 const CAR = require('@verdebydesign/car');
 
-const validArgs = CAR(defined, longform, err => console.log(err));
+const validArgs = CAR(defined, longform, err => console.log(err), value => /* validate values here*/ value | true | false);
 ```
 
 ### Flags
@@ -64,7 +64,7 @@ Mixed flags allow flags to have different values, other than just ```true```.
 ### Values
 
 ```command --arg <value>``` Values are validated and tested against the defined and longform list of arguments.
-CAR, exposes a ```validateValue``` function for input validation, CAR will continue or fail on the value validation.
+CAR, exposes a ```validateValues``` function for input validation, CAR will continue or fail on a value validation.
 
 ### Option help
 

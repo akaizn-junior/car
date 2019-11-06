@@ -44,7 +44,7 @@ function get_data_to_append(cmd_args) {
 function handle_vars(args, values, callbacks) {
 	let { cmd_args, longform, arg_pos, defined} = args;
 	let { possible, default_value, helpOptionValue } = values;
-	let { help, failed, success } = callbacks;
+	let { help, failed, validateValues, success } = callbacks;
 
 	// gathered if OPERATOR.append is used
 	const data_to_append = get_data_to_append(cmd_args);
@@ -53,7 +53,7 @@ function handle_vars(args, values, callbacks) {
 		read_value(
 			{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 			{ possible, default_value, helpOptionValue },
-			{ success, failed, help }
+			{ success, failed, validateValues, help }
 		);
 		// skip
 		return 0;
@@ -62,7 +62,7 @@ function handle_vars(args, values, callbacks) {
 	read_value(
 		{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 		{ possible: data_to_append, default_value, helpOptionValue },
-		{ success, failed, help }
+		{ success, failed, validateValues, help }
 	);
 	// done
 	return 1;
@@ -78,7 +78,7 @@ function handle_vars(args, values, callbacks) {
 function read_value(args, values, callbacks) {
 	let { defined, longformList, cmd_args, arg_pos, longform } = args;
 	let { possible, default_value, helpOptionValue } = values;
-	let { success, failed, help } = callbacks;
+	let { success, failed, validateValues, help } = callbacks;
 
 	let option = cmd_args[arg_pos].split(OPERATOR.equal)[0];
 	// translate long form arg if read
@@ -88,17 +88,22 @@ function read_value(args, values, callbacks) {
 	if (!VALID_ARGS[option]) {
 		// try input values first
 		if (possible) {
-			run_help(option, possible, helpOptionValue, help);
-			return add_arg(option, possible, success);
-		} else if (arg_pos + 1 <= cmd_args.length) {
-			// get a valid value on the next index or the default value
-			let value = get_valid_value({ defined, longformList, option },
-				{ value: cmd_args[++arg_pos], default_value, helpOptionValue },
-				{ failed }
+			let validValue = get_valid_value({ defined, longformList, option },
+				{ value: possible, default_value, helpOptionValue },
+				{ failed, validateValues }
 			);
 
-			run_help(option, value, helpOptionValue, help);
-			return add_arg(option, value, success);
+			run_help(option, validValue, helpOptionValue, help);
+			return add_arg(option, validValue, success);
+		} else if (arg_pos + 1 <= cmd_args.length) {
+			// get a valid value on the next index or the default value
+			let nextValidValue = get_valid_value({ defined, longformList, option },
+				{ value: cmd_args[++arg_pos], default_value, helpOptionValue },
+				{ failed, validateValues }
+			);
+
+			run_help(option, nextValidValue, helpOptionValue, help);
+			return add_arg(option, nextValidValue, success);
 		} else {
 			// no valid value to read
 			failed(`no valid value to read for option "${option}"`);
@@ -122,17 +127,25 @@ function read_value(args, values, callbacks) {
 function get_valid_value(args, values, callbacks) {
 	let { defined, longformList, option } = args;
 	const { value, default_value, helpOptionValue } = values;
-	let { failed } = callbacks;
+	let { failed, validateValues } = callbacks;
 
-	if (value && !defined[value] && !longformList[value] && value !== OPERATOR.equal) {
-		return value;
-	} else if (default_value !== undefined && !defined[default_value] && !longformList[default_value]) {
-		return default_value;
+	if (value && validateValues(value)
+		&& !defined[value]
+		&& !longformList[value]
+		&& value !== OPERATOR.equal
+	) {
+		return validateValues(value);
+	} else if (default_value !== undefined
+		&& !defined[default_value]
+		&& !longformList[default_value]
+		&& validateValues(default_value)
+	) {
+		return validateValues(default_value);
 	} else if (HELP_OPTIONS.includes(value)
 		|| HELP_OPTIONS.includes(default_value)
 		|| helpOptionValue === value
 		|| helpOptionValue === default_value) {
-		return value || default_value;
+		return validateValues(value) || validateValues(default_value);
 	} else {
 		// invalid arg value, maybe another arg or OPERATOR.equal
 		failed('invalid value '.concat(value, ' for option ', option));
@@ -253,7 +266,7 @@ function get_defaults(definedOption) {
  */
 function validate_args(args, callbacks) {
 	const { cmd_args, defined, longform } = args;
-	const { failed } = callbacks;
+	const { failed, validateValues } = callbacks;
 
 	const len = cmd_args.length;
 	// when to start counting possible valid arguments
@@ -277,7 +290,7 @@ function validate_args(args, callbacks) {
 				const result = handle_vars(
 					{ cmd_args, arg_pos: i, longform, defined },
 					{ possible, default_value, helpOptionValue },
-					{ help, failed, success }
+					{ help, failed, validateValues, success }
 				);
 					// skip the index of a possible value if 'var'
 					// is not assigned using OPERATOR.equal

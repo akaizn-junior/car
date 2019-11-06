@@ -53,10 +53,10 @@ const { validate_args } = require('./helpers');
  * `command -f`
  * // running a command with the '-f' option will run its callback
  */
-function CAR(defined, longform = {}, failed = () => { }) {
+function CAR(defined, longform = {}, failed = () => { }, validateValues = value => value) {
 	return validate_args(
 		{ cmd_args: process.argv, defined, longform },
-		{ failed }
+		{ failed, validateValues }
 	);
 }
 

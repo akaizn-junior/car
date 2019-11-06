@@ -43,7 +43,7 @@ function get_data_to_append(cmd_args) {
  * @returns {number} 0 to skip a validation or 1 to end validation
  */
 function handle_vars(args, values, callbacks) {
-	let { cmd_args, longform, arg_pos } = args;
+	let { cmd_args, longform, arg_pos, defined} = args;
 	let { possible, default_value, helpOptionValue } = values;
 	let { help, failed, success } = callbacks;
 
@@ -52,7 +52,7 @@ function handle_vars(args, values, callbacks) {
 
 	if (!data_to_append.length) {
 		read_value(
-			{ cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
+			{ defined, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 			{ possible, default_value, helpOptionValue },
 			{ success, failed, help }
 		);
@@ -61,7 +61,7 @@ function handle_vars(args, values, callbacks) {
 	}
 
 	read_value(
-		{ cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
+		{ defined, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 		{ possible: data_to_append, default_value, helpOptionValue },
 		{ success, failed, help }
 	);
@@ -77,7 +77,7 @@ function handle_vars(args, values, callbacks) {
  * @returns {void}
  */
 function read_value(args, values, callbacks) {
-	let { cmd_args, arg_pos, longform } = args;
+	let { defined, cmd_args, arg_pos, longform } = args;
 	let { possible, default_value, helpOptionValue } = values;
 	let { success, failed, help } = callbacks;
 
@@ -93,7 +93,7 @@ function read_value(args, values, callbacks) {
 			return add_arg(option, possible, success);
 		} else if (arg_pos + 1 <= cmd_args.length) {
 			// get a valid value on the next index or the default value
-			let value = get_valid_value({ option },
+			let value = get_valid_value({ defined, option },
 				{ value: cmd_args[++arg_pos], default_value, helpOptionValue },
 				{ failed }
 			);
@@ -121,13 +121,13 @@ function read_value(args, values, callbacks) {
  * @returns {string|void} A valid argument value or void
  */
 function get_valid_value(args, values, callbacks) {
-	let { option } = args;
+	let { defined, option } = args;
 	const { value, default_value, helpOptionValue } = values;
 	let { failed } = callbacks;
 
-	if (value && !value.startsWith(OPERATOR.arg_indicator) && value !== OPERATOR.equal) {
+	if (value && !defined[value] && value !== OPERATOR.equal) {
 		return value;
-	} else if (default_value !== undefined) {
+	} else if (default_value !== undefined && !defined[default_value]) {
 		return default_value;
 	} else if (HELP_OPTIONS.includes(value)
 		|| HELP_OPTIONS.includes(default_value)
@@ -276,7 +276,7 @@ function validate_args(args, callbacks) {
 			switch (true) {
 			case defined[actual].var:
 				const result = handle_vars(
-					{ cmd_args, arg_pos: i, longform },
+					{ cmd_args, arg_pos: i, longform, defined },
 					{ possible, default_value, helpOptionValue },
 					{ help, failed, success }
 				);

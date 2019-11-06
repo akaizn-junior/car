@@ -51,7 +51,7 @@ function handle_vars(args, values, callbacks) {
 
 	if (!data_to_append.length) {
 		read_value(
-			{ defined, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
+			{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 			{ possible, default_value, helpOptionValue },
 			{ success, failed, help }
 		);
@@ -60,7 +60,7 @@ function handle_vars(args, values, callbacks) {
 	}
 
 	read_value(
-		{ defined, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
+		{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
 		{ possible: data_to_append, default_value, helpOptionValue },
 		{ success, failed, help }
 	);
@@ -76,7 +76,7 @@ function handle_vars(args, values, callbacks) {
  * @returns {void}
  */
 function read_value(args, values, callbacks) {
-	let { defined, cmd_args, arg_pos, longform } = args;
+	let { defined, longformList, cmd_args, arg_pos, longform } = args;
 	let { possible, default_value, helpOptionValue } = values;
 	let { success, failed, help } = callbacks;
 
@@ -92,7 +92,7 @@ function read_value(args, values, callbacks) {
 			return add_arg(option, possible, success);
 		} else if (arg_pos + 1 <= cmd_args.length) {
 			// get a valid value on the next index or the default value
-			let value = get_valid_value({ defined, option },
+			let value = get_valid_value({ defined, longformList, option },
 				{ value: cmd_args[++arg_pos], default_value, helpOptionValue },
 				{ failed }
 			);
@@ -120,13 +120,13 @@ function read_value(args, values, callbacks) {
  * @returns {string|void} A valid argument value or void
  */
 function get_valid_value(args, values, callbacks) {
-	let { defined, option } = args;
+	let { defined, longformList, option } = args;
 	const { value, default_value, helpOptionValue } = values;
 	let { failed } = callbacks;
 
-	if (value && !defined[value] && value !== OPERATOR.equal) {
+	if (value && !defined[value] && !longformList[value] && value !== OPERATOR.equal) {
 		return value;
-	} else if (default_value !== undefined && !defined[default_value]) {
+	} else if (default_value !== undefined && !defined[default_value] && !longformList[default_value]) {
 		return default_value;
 	} else if (HELP_OPTIONS.includes(value)
 		|| HELP_OPTIONS.includes(default_value)

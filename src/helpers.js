@@ -7,8 +7,7 @@ const { done, end } = require('./utils');
 const VALID_ARGS = {};
 const OPERATOR = {
 	equal: '=',
-	append: '--',
-	arg_indicator: '-'
+	append: '--'
 };
 
 const HELP_OPTIONS = ['--help', 'help', '-h'];

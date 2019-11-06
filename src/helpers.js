@@ -1,3 +1,7 @@
+const exec = require('child_process').execFile;
+const path = require('path');
+const pkg = require(path.join(process.cwd(), 'package.json'));
+
 const { done, end } = require('./utils');
 
 const VALID_ARGS = {};
@@ -150,6 +154,46 @@ function add_arg(option, value, success) {
 	return;
 }
 
+function handle_man(str) {
+	const man_placeholder = '%man';
+	// assume the string as an hash for an index
+	const [placeholder, index] = str.split('#');
+	const man = pkg.man;
+	const man_len = man.length;
+	let script_args = [];
+	// check if the man setting is valid to use
+	let isvalid = false;
+
+	// man is an array of man files ['main.1', 'opt.1']
+	// if no index is provided use the first index
+	if (!index && placeholder === man_placeholder && typeof man !== 'string') {
+		script_args = [`${man[0]}`];
+		isvalid = true;
+	}
+
+	// if an index is provided, use the index
+	if (index && placeholder === man_placeholder && typeof man !== 'string') {
+		script_args = [`${man[index % man_len]}`];
+		isvalid = true;
+	}
+
+	// if man is just a string
+	if (!index && placeholder === man_placeholder && typeof man === 'string') {
+		script_args = [`${man}`];
+		isvalid = true;
+	}
+
+	if (isvalid) {
+		return exec('man', script_args, { windowsHide: true }, (err, stdout, stderr) => {
+			if (!err && !stderr) {
+				process.stdout.write(stdout);
+			}
+		});
+	}
+
+	return;
+}
+
 /**
  * Read a value matching an option that triggers showing help for a specific option/command.
  * Runs the option help or simply continue.
@@ -157,11 +201,17 @@ function add_arg(option, value, success) {
  * @param {string} value The value read
  * @param {string} helpOptionValue The value set to trigger help for a specific option
  * @param {funtion} call The help function for the option
+ * @returns {void}
  */
 function run_help(option, value, helpOptionValue, call) {
-	if (HELP_OPTIONS.includes(value) || helpOptionValue === value) {
+	const showHelp = HELP_OPTIONS.includes(value) || helpOptionValue === value;
+	if (typeof call === 'function' && showHelp) {
 		call(option);
 		done();
+	}
+
+	if (typeof call === 'string' && showHelp) {
+		handle_man(call);
 	}
 }
 

@@ -36,6 +36,10 @@ const DEFINED_ARGS = {
 		default: 'mixed',
 		cb: () => console.log('mixed flag "-m" may read a value')
 	},
+	'-w': {
+		var: true,
+		help: '%man#1'
+	}
 };
 
 const LONG_FROM = {
@@ -43,6 +47,7 @@ const LONG_FROM = {
 	'--mixed': '-m',
 	'--combo': '-c',
 	'--flag': '-f',
+	'--welp': '-w'
 };
 
 const validArgs = CAR(DEFINED_ARGS, LONG_FROM, err => {

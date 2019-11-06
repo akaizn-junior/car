@@ -7,10 +7,21 @@
 		"lint": "eslint .",
 		"doc": "jsdoc src/CAR.js -c jsdoc.json --verbose"
 	},
+	"bin": {
+		"command": "./example/command.js"
+	},
 	"author": "Simao Nziaka",
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/",
 		"tag": "latest"
+	},
+	"man": [
+		"./man/command.1",
+		"./man/welp.1"
+	],
+	"directories": {
+		"man": "./man",
+		"lib": "src"
 	},
 	"license": "ISC",
 	"repository": {

@@ -6,7 +6,7 @@
  * Run the example command by `node example/command [args]`
  */
 
-const CAR = require('../src/CAR');
+const CAR = require('../src/car');
 
 function a_help() {
 	console.log([
@@ -20,37 +20,34 @@ const DEFINED_ARGS = {
 		var: true,
 		help: a_help,
 		helpOption: 'h',
-		cb: () => console.log('var "-a" option must read a value')
+		cb: () => console.log('var "-a" option must read a value'),
+		longform: '--var'
 	},
 	'-f': {
 		flag: true,
-		cb: () => console.log('used flag "-f"')
+		cb: () => console.log('used flag "-f"'),
+		longform: '--flag'
 	},
 	'-c': {
 		flag: true,
 		cb: () => console.log('"-c" must be the first and only option used. Do not combine "-c" option with other options'),
-		combine: false
+		combine: false,
+		longform: '--combo'
 	},
 	'-m': {
 		var: true,
 		default: 'mixed',
-		cb: () => console.log('mixed flag "-m" may read a value')
+		cb: () => console.log('mixed flag "-m" may read a value'),
+		longform: '--mixed'
 	},
 	'-w': {
 		var: true,
-		help: '%man#1'
+		help: '%man#1',
+		longform: '--welp'
 	}
 };
 
-const LONG_FROM = {
-	'--var': '-v',
-	'--mixed': '-m',
-	'--combo': '-c',
-	'--flag': '-f',
-	'--welp': '-w'
-};
-
-const validArgs = CAR(DEFINED_ARGS, LONG_FROM, err => {
+const validArgs = CAR(DEFINED_ARGS, err => {
 	console.log(err);
 });
 

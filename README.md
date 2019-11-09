@@ -9,10 +9,12 @@ Reads command line arguments and validates them based on a defined list
 ```js
 const defined = {
   '-f': {
-    flag: true
+    flag: true,
+    longform: '--flag'
   },
   '-v': {
-    flag: true // flag
+    flag: true, // flag
+    longform: '--var'
   },
   '-m': {
     var: true,
@@ -20,30 +22,20 @@ const defined = {
   },
   '-o': {
     var: true, // variable
-    help: o_help
+    help: o_help,
+    longform: '--out'
   }
-};
-```
-
-## Long form list
-
-```js
-const longform = {
-    '--flag': '-f',
-    '--mixed': '-m',
-    '--combo': '-c',
-    '--flag': '-f',
 };
 ```
 
 ## Usage
 
-CAR reads 3 arguments, the defined list is the only required argument.
+CAR reads 2 arguments, the defined list is the only required argument.
 
 ```js
 const CAR = require('@verdebydesign/car');
 
-const validArgs = CAR(defined, longform, err => console.log(err), value => /* validate values here*/ value | true | false);
+const validArgs = CAR(defined, err => console.log(err));
 ```
 
 ### Flags
@@ -63,7 +55,7 @@ Mixed flags allow flags to have different values, other than just ```true```.
 
 ### Values
 
-```command --arg <value>``` Values are validated and tested against the defined and longform list of arguments.
+```command --arg <value>``` Values are validated and tested against the defined list of arguments.
 CAR, exposes a ```validateValues``` function for input validation, CAR will continue or fail on a value validation.
 
 ### Option help

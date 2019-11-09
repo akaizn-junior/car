@@ -9,7 +9,7 @@ const { validator } = require('./helpers');
 /**
  * CAR 🚗 🚗 🚗
  * Reads 'process.argv' for command line argument and validates them following a defined list
- * @param {object} defined A list of defined arguments by the user
+ * @param {object} defined The user list of defined arguments
  * @param {function} failed (err: string) => {} A callback for when validation fails for an argument or its value
  * @returns {object} A map of valid arguments
  * @example

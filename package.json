@@ -5,7 +5,7 @@
 	"main": "src/CAR.js",
 	"scripts": {
 		"lint": "eslint .",
-		"doc": "jsdoc src/CAR.js -c jsdoc.json --verbose"
+		"doc": "jsdoc src/car.js -c jsdoc.json --verbose"
 	},
 	"bin": {
 		"command": "./example/command.js"

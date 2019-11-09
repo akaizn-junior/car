@@ -15,7 +15,7 @@ function a_help() {
 	].join('\n'));
 }
 
-const DEFINED_ARGS = {
+const DEFINED = {
 	'-v': {
 		var: true,
 		help: a_help,
@@ -47,9 +47,6 @@ const DEFINED_ARGS = {
 	}
 };
 
-const validArgs = CAR(DEFINED_ARGS, err => {
-	console.log(err);
-});
-
+const validArgs = CAR(DEFINED, err => console.log(err));
 // output CAR valid arguments
 console.log(validArgs);

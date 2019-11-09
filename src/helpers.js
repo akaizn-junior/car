@@ -249,10 +249,10 @@ function validator(args, failed) {
 				}
 				break;
 			case defined[actual].flag && combine:
-				add_arg({ defined, actual }, true, success);
+				add_arg({ defined, option: actual }, true, success);
 				break;
 			case defined[actual].flag && !combine:
-				if (i === pos_0) add_arg({ defined, actual }, true, success);
+				if (i === pos_0) add_arg({ defined, option: actual }, true, success);
 				// options that cannot be combined w/ others will end the process
 				done();
 				break;

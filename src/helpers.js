@@ -1,16 +1,16 @@
-const exec = require('child_process').execFile;
-const path = require('path');
-const pkg = require(path.join(process.cwd(), 'package.json'));
-
 const { done, end } = require('./utils');
 
-const VALID_ARGS = {};
-const OPERATOR = {
+// globals
+
+const valid_args = {};
+const operator = {
 	equal: '=',
-	append: '--'
+	append: '--',
+	'--': 'append',
+	'=': 'equal'
 };
 
-const HELP_OPTIONS = ['--help', 'help', '-h'];
+const help_opts = ['--help', 'help', '-h'];
 
 /**
  * Verifies if arguments include the append operator;
@@ -18,213 +18,32 @@ const HELP_OPTIONS = ['--help', 'help', '-h'];
  * @param {array} cmd_args process arguments
  * @returns {string} Arguments read by the append operator or an empty string
  */
-function get_data_to_append(cmd_args) {
-	const appendOpIndex = cmd_args.indexOf(OPERATOR.append);
+function to_append(cmd_args) {
+	const appendOpIndex = cmd_args.indexOf(operator.append);
 	const empty = String();
 
 	if (appendOpIndex !== -1) {
-		return cmd_args.reduce((acc = empty, value, i) => {
+		return cmd_args.reduce((acc, value, i) => {
 			if (i > appendOpIndex) {
 				return `${acc} ${value}`;
 			}
 			return empty;
-		}).trim();
+		}, empty).trim();
 	}
 
 	return empty;
 }
 
-/**
- * Handle CAR vars
- * @param {object} args Arguments data
- * @param {object} values Values to validate
- * @param {object} callbacks Functions to run when operations complete
- * @returns {number} 0 to skip a validation or 1 to end validation
- */
-function handle_vars(args, values, callbacks) {
-	let { cmd_args, longform, arg_pos, defined} = args;
-	let { possible, default_value, helpOptionValue } = values;
-	let { help, failed, validateValues, success } = callbacks;
-
-	// gathered if OPERATOR.append is used
-	const data_to_append = get_data_to_append(cmd_args);
-
-	if (!data_to_append.length) {
-		read_value(
-			{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
-			{ possible, default_value, helpOptionValue },
-			{ success, failed, validateValues, help }
-		);
-		// skip
-		return 0;
-	}
-
-	read_value(
-		{ defined, longformList: longform, cmd_args, arg_pos, longform: longform[cmd_args[arg_pos]] },
-		{ possible: data_to_append, default_value, helpOptionValue },
-		{ success, failed, validateValues, help }
-	);
-	// done
-	return 1;
-}
-
-/**
- * Reads the value passed to an argument read as a 'var'
- * @param {object} args Arguments data
- * @param {object} values Values to validate
- * @param {object} callbacks Functions to run when operations complete
- * @returns {void}
- */
-function read_value(args, values, callbacks) {
-	let { defined, longformList, cmd_args, arg_pos, longform } = args;
-	let { possible, default_value, helpOptionValue } = values;
-	let { success, failed, validateValues, help } = callbacks;
-
-	let option = cmd_args[arg_pos].split(OPERATOR.equal)[0];
-	// translate long form arg if read
-	option = longform || option;
-
-	// verify if value already exists to avoid double declaration
-	if (!VALID_ARGS[option]) {
-		// try input values first
-		if (possible) {
-			let validValue = get_valid_value({ defined, longformList, option },
-				{ value: possible, default_value, helpOptionValue },
-				{ failed, validateValues }
-			);
-
-			run_help(option, validValue, helpOptionValue, help);
-			return add_arg(option, validValue, success);
-		} else if (arg_pos + 1 <= cmd_args.length) {
-			// get a valid value on the next index or the default value
-			let nextValidValue = get_valid_value({ defined, longformList, option },
-				{ value: cmd_args[++arg_pos], default_value, helpOptionValue },
-				{ failed, validateValues }
-			);
-
-			run_help(option, nextValidValue, helpOptionValue, help);
-			return add_arg(option, nextValidValue, success);
-		} else {
-			// no valid value to read
-			failed(`no valid value to read for option "${option}"`);
-			end();
+function get_longform(defined, actual = null) {
+	const longform = {};
+	// get all longform matches
+	for (let key in defined) {
+		if (defined[key] && defined[key].longform) {
+			longform[defined[key].longform] = key;
 		}
-	} else {
-		// already declared
-		failed(`repeated option "${option}"`);
-		end();
-	}
-}
-
-/**
- * Validates the value read, return it if its a valid value,
- * otherwise return the default value
- * @param {object} args Arguments data
- * @param {object} values Values to validate
- * @param {object} callbacks Functions to run when operations complete
- * @returns {string|void} A valid argument value or void
- */
-function get_valid_value(args, values, callbacks) {
-	let { defined, longformList, option } = args;
-	const { value, default_value, helpOptionValue } = values;
-	let { failed, validateValues } = callbacks;
-
-	if (value && validateValues(value)
-		&& !defined[value]
-		&& !longformList[value]
-		&& value !== OPERATOR.equal
-	) {
-		return validateValues(value);
-	} else if (default_value !== undefined
-		&& !defined[default_value]
-		&& !longformList[default_value]
-		&& validateValues(default_value)
-	) {
-		return validateValues(default_value);
-	} else if (HELP_OPTIONS.includes(value)
-		|| HELP_OPTIONS.includes(default_value)
-		|| helpOptionValue === value
-		|| helpOptionValue === default_value) {
-		return validateValues(value) || validateValues(default_value);
-	} else {
-		// invalid arg value, maybe another arg or OPERATOR.equal
-		failed('invalid value '.concat(value, ' for option ', option));
-		end();
-	}
-}
-
-/**
- * Adds (k,v) like data to a global list of validated arguments
- * @param {string} option A valid command line option
- * @param {string} value The value for the option
- * @param {function} success The callback for when data was added successfully
- * @returns {void}
- */
-function add_arg(option, value, success) {
-	VALID_ARGS[option] = value;
-	success(VALID_ARGS);
-	return;
-}
-
-function handle_man(str) {
-	const man_placeholder = '%man';
-	// assume the string as an hash for an index
-	const [placeholder, index] = str.split('#');
-	const man = pkg.man;
-	const man_len = man.length;
-	let script_args = [];
-	// check if the man setting is valid to use
-	let isvalid = false;
-
-	// man is an array of man files ['main.1', 'opt.1']
-	// if no index is provided use the first index
-	if (!index && placeholder === man_placeholder && typeof man !== 'string') {
-		script_args = [`${man[0]}`];
-		isvalid = true;
 	}
 
-	// if an index is provided, use the index
-	if (index && placeholder === man_placeholder && typeof man !== 'string') {
-		script_args = [`${man[index % man_len]}`];
-		isvalid = true;
-	}
-
-	// if man is just a string
-	if (!index && placeholder === man_placeholder && typeof man === 'string') {
-		script_args = [`${man}`];
-		isvalid = true;
-	}
-
-	if (isvalid) {
-		return exec('man', script_args, { windowsHide: true }, (err, stdout, stderr) => {
-			if (!err && !stderr) {
-				process.stdout.write(stdout);
-			}
-		});
-	}
-
-	return;
-}
-
-/**
- * Read a value matching an option that triggers showing help for a specific option/command.
- * Runs the option help or simply continue.
- * @param {string} option The option to show help for
- * @param {string} value The value read
- * @param {string} helpOptionValue The value set to trigger help for a specific option
- * @param {funtion} call The help function for the option
- * @returns {void}
- */
-function run_help(option, value, helpOptionValue, call) {
-	const showHelp = HELP_OPTIONS.includes(value) || helpOptionValue === value;
-	if (typeof call === 'function' && showHelp) {
-		call(option);
-		done();
-	}
-
-	if (typeof call === 'string' && showHelp) {
-		handle_man(call);
-	}
+	return actual ? longform[actual] : longform;
 }
 
 /**
@@ -239,84 +58,213 @@ function value_or_default(__obj, __key, __default) {
 }
 
 /**
- * Get default values for keys for an option on the defined list
- * @param {object} definedOption An option from the defined list
+ * Adds (k,v) like data to a global list of validated arguments
+ * @param {string} args Args data
+ * @param {string} value The value for the option
+ * @param {function} success The callback for when data was added successfully
+ * @returns {void}
  */
-function get_defaults(definedOption) {
-	// can this current arg be combined with other args
-	const combine = value_or_default(definedOption, 'combine', true);
-	// run this callback if this argument is valid
-	const success = value_or_default(definedOption, 'cb', function() { });
-	// does this option have help data
-	const help = value_or_default(definedOption, 'help', function() { });
-	// does this option have its own set help option
-	const helpOptionValue = value_or_default(definedOption, 'helpOption', HELP_OPTIONS);
-	// if the argument read is a 'mixed flag' aka a 'var' with a default value
-	// get the default value
-	const default_value = value_or_default(definedOption, 'default', undefined);
+function add_arg(args, value, success) {
+	const { defined, option } = args;
+	// does this option have a help callback
+	const help = value_or_default(defined[option], 'help', function() { });
+	// try to run help if the value is a help option
+	run_help(option, value, help);
+	// otherwise just add the value to the valid list
+	valid_args[option] = value;
+	success(valid_args);
+	return;
+}
 
-	return { combine, success, help, helpOptionValue, default_value };
+/**
+ * Validates user input value
+ * @param {string} value User input value
+ */
+function validate_values(value) {
+	return value.replace(/[><,\\/[\]]+/g, '');
+}
+
+/**
+ * Validates the value read, return it if its a valid value,
+ * otherwise return the default value
+ * @param {object} args Arguments data
+ * @param {object} values Values to validate
+ * @param {object} callbacks Functions to run when operations complete
+ * @returns {string|void} A valid argument value or void
+ */
+function get_valid_value(args, values, failed) {
+	let { defined, option } = args;
+	const { value, default_value } = values;
+
+	const longform = get_longform(defined);
+	const is_valid = validator.validate_values;
+
+	if (value && is_valid(value)
+		&& !defined[value]
+		&& !longform[value] && !operator[value]
+	) {
+		return is_valid(value);
+	} else if (default_value !== undefined
+		&& !defined[default_value]
+		&& !longform[default_value]
+		&& is_valid(default_value)
+	) {
+		return is_valid(default_value);
+	} else {
+		// invalid arg value, maybe another arg or operator.equal
+		failed('invalid value '.concat(value, ' for option ', option));
+		end();
+	}
+}
+
+/**
+ * Read a value matching an option that triggers showing help for a specific option/command.
+ * Runs the option help or simply continues.
+ * @param {string} option The option to show help for
+ * @param {string} value A possible help option read
+ * @param {funtion} call The help function for the option
+ * @returns {void}
+ */
+function run_help(option, value, call) {
+	const showHelp = help_opts.includes(value);
+	if (typeof call === 'function' && showHelp) {
+		call(option);
+		done();
+	}
+}
+
+/**
+ * Reads the value passed to an argument read as a 'var'
+ * @param {object} args Arguments data
+ * @param {object} values Values to validate
+ * @param {object} callbacks Functions to run when operations complete
+ * @returns {void}
+ */
+function eval_value(args, possible, failed) {
+	let { proc_args, pos, defined } = args;
+
+	// get the actual option
+	let option = proc_args[pos].split(operator.equal)[0];
+	// translate long form option if read
+	option = get_longform(defined, option) || option;
+
+	// run this callback on sucess
+	const success = value_or_default(defined[option], 'cb', function() { });
+	// does this var has a default value
+	const default_value = value_or_default(defined[option], 'default', undefined);
+
+	// verify if value already exists to avoid double declaration
+	// and verify if the option is defined, because why not
+	if (!valid_args[option] && defined[option]) {
+		if (possible) {
+			const valid_value = get_valid_value(args, { value: possible, default_value }, failed);
+			add_arg({ defined, option }, valid_value, success);
+		} else if (pos + 1 < proc_args.length || default_value) {
+			const next_valid_value = get_valid_value(args, { value: proc_args[++pos], default_value }, failed);
+			add_arg({ defined, option }, next_valid_value, success);
+		} else {
+			failed(`no valid value to read for option "${option}"`);
+			end();
+		}
+	} else {
+		// already declared
+		failed(`repeated option "${option}"`);
+		end();
+	}
+}
+
+/**
+ * Handle CAR vars
+ * @param {object} args Arguments data
+ * @param {object} values Values to validate
+ * @param {object} callbacks Functions to run when operations complete
+ * @returns {number} 0 to skip an argument or 1 to end validation
+ */
+function vars(args, possible, failed) {
+	let { proc_args } = args;
+
+	// get data if operator.append is used
+	const append = to_append(proc_args);
+
+	// if there is data to append
+	if (append.length) {
+		eval_value(args, append, failed);
+		// end validation
+		return 1;
+	}
+
+	eval_value(args, possible, failed);
+	// skip an argument
+	return 0;
 }
 
 /**
  * Validates cmd args
  * @param {object} args Arguments data
- * @param {object} callbacks Functions to run when operations complete
+ * @param {object} failed User callback for when operations fail
  * @returns {void}
  */
-function validate_args(args, callbacks) {
-	const { cmd_args, defined, longform } = args;
-	const { failed, validateValues } = callbacks;
+function validator(args, failed) {
+	// get overriden methods first
+	validator.validate_values = typeof validator.validate_values === 'function'
+		? validator.validate_values : validate_values;
 
-	const len = cmd_args.length;
+	// process args and the defined list
+	const { proc_args, defined } = args;
+	const len = proc_args.length;
 	// when to start counting possible valid arguments
 	const pos_0 = 2;
 
+	// the big loop
 	for (let i = pos_0; i < len; i++) {
-		let curr = cmd_args[i];
+		// the current arg read
+		let curr = proc_args[i];
 		// was OPERATOR.equal used to pass a value?
-		let actual = curr.split(OPERATOR.equal)[0];
+		let actual = curr.split(operator.equal)[0];
 		// get its possible value
-		let possible = curr.split(OPERATOR.equal)[1];
-
+		let possible = curr.split(operator.equal)[1];
 		// verify and translate the actual option if is in long form
-		actual = longform[actual] || actual;
+		actual = get_longform(defined, actual) || actual;
 
-		const { combine, success, help, helpOptionValue, default_value } = get_defaults(defined[actual]);
+		// can this current arg be combined with other args
+		const combine = value_or_default(defined[actual], 'combine', true);
+		// run this callback if this argument is valid
+		const success = value_or_default(defined[actual], 'cb', function() { });
+		// does this option have its own 'help' option
+		const custom_help = value_or_default(defined[actual], 'helpOption', undefined);
 
+		// if the user set a custom value for a help option add it to the list
+		custom_help && help_opts.push(custom_help);
+
+		// verify if 'actual' is actually a thing on the defined list
 		if (actual && defined[actual]) {
 			switch (true) {
 			case defined[actual].var:
-				const result = handle_vars(
-					{ cmd_args, arg_pos: i, longform, defined },
-					{ possible, default_value, helpOptionValue },
-					{ help, failed, validateValues, success }
-				);
-					// skip the index of a possible value if 'var'
-					// is not assigned using OPERATOR.equal
+				const result = vars({ defined, proc_args, pos: i }, possible, failed);
 				if (!result) {
+					// skip a possible value
 					!possible && i++;
 				} else {
-					// end loop
-					i = len;
+					i = len; // end validation
 				}
 				break;
 			case defined[actual].flag && combine:
-				add_arg(actual, true, success);
+				add_arg({ defined, actual }, true, success);
 				break;
 			case defined[actual].flag && !combine:
-				if (i === pos_0) add_arg(actual, true, success);
+				if (i === pos_0) add_arg({ defined, actual }, true, success);
 				// options that cannot be combined w/ others will end the process
 				done();
 				break;
 			}
-		} else if (actual !== OPERATOR.append) {
-			failed('invalid argument'.concat(' "', cmd_args[i], '"'));
+		} else if (!operator[actual]) {
+			// 'actual' is not a thing; skip 'failed' if 'actual' is an operator
+			failed('invalid argument'.concat(' "', proc_args[i], '"'));
 			end();
 		}
 	}
 
-	return VALID_ARGS;
+	return valid_args;
 }
 
-module.exports = { validate_args };
+module.exports = { validator };

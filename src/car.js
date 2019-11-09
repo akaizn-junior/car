@@ -4,25 +4,26 @@
  * (c) 2019 Verdexdesign
  */
 
-const { validate_args } = require('./helpers');
+const { validator } = require('./helpers');
 
 /**
  * CAR 🚗 🚗 🚗
  * Reads 'process.argv' for command line argument and validates them following a defined list
  * @param {object} defined A list of defined arguments by the user
- * @param {object} longform A list of long form arguments to match the short form args in the defined list
  * @param {function} failed (err: string) => {} A callback for when validation fails for an argument or its value
  * @returns {object} A map of valid arguments
  * @example
  * const defined = {
  *	 '-f': {
  *		flag: true,
- *		cb: () => { } // the function to call when this option is used
+ *		cb: () => { }, // the function to call when this option is used
+ *      longform: '--flag'
  *	 },
  *	 '-v': {
  *		var: true,
  *		cb: () => { },
- *		help: v_help
+ *		help: v_help,
+ *      longform: '--var'
  *	 },
  *	 '-m': {
  *		var: true,
@@ -37,14 +38,7 @@ const { validate_args } = require('./helpers');
  *	 }
  * };
  *
- * const longform = {
- *	'--flag': '-f',
- *	'--var': '-v',
- *	'--mixed': '-m',
- *	'--other': '-o'
- * }
- *
- * const validArgs = CAR(defined, longform, err => {
+ * const valid = CAR(defined, err => {
  *	// only runs if validation fails
  *	console.log(err);
  * });
@@ -53,11 +47,10 @@ const { validate_args } = require('./helpers');
  * `command -f`
  * // running a command with the '-f' option will run its callback
  */
-function CAR(defined, longform = {}, failed = () => { }, validateValues = value => value) {
-	return validate_args(
-		{ cmd_args: process.argv, defined, longform },
-		{ failed, validateValues }
-	);
+function CAR(defined, failed = () => {}) {
+	const valid_args = validator({ proc_args: process.argv, defined }, failed);
+	validator.validate_values = CAR.validateValues;
+	return valid_args;
 }
 
-module.exports = CAR; // 🚗 🚗 🚗
+module.exports = CAR;

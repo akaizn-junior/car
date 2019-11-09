@@ -154,9 +154,15 @@
 		"jsx-quotes": 0,
 		"key-spacing": 2,
 		"keyword-spacing": [2, {
-			"before": true,
-			"after": true
-		}],
+            "before": true,
+            "after": true,
+            "overrides": {
+                "if": {"after": true},
+                "for": {"after": true},
+                "while": {"after": true},
+                "catch": {"after": true}
+            }
+        }],
 		"linebreak-style": 2,
 		"lines-around-comment": 0,
 		"max-depth": 1,

@@ -4,10 +4,10 @@ const { done, end } = require('./utils');
 
 const valid_args = {};
 const operator = {
-	equal: '=',
+	assign: '=',
 	append: '--',
 	'--': 'append',
-	'=': 'equal'
+	'=': 'assign'
 };
 
 const help_opts = ['--help', 'help', '-h'];
@@ -113,7 +113,7 @@ function get_valid_value(args, values, failed) {
 	) {
 		return is_valid(default_value);
 	} else {
-		// invalid arg value, maybe another arg or operator.equal
+		// invalid arg value, maybe another arg or operator.assign
 		failed('invalid value '.concat(value, ' for option ', option));
 		end();
 	}
@@ -146,7 +146,7 @@ function eval_value(args, possible, failed) {
 	let { proc_args, pos, defined } = args;
 
 	// get the actual option
-	let option = proc_args[pos].split(operator.equal)[0];
+	let option = proc_args[pos].split(operator.assign)[0];
 	// translate long form option if read
 	option = get_longform(defined, option) || option;
 
@@ -221,10 +221,10 @@ function validator(args, failed) {
 	for (let i = pos_0; i < len; i++) {
 		// the current arg read
 		let curr = proc_args[i];
-		// was OPERATOR.equal used to pass a value?
-		let actual = curr.split(operator.equal)[0];
+		// was OPERATOR.assign used to pass a value?
+		let actual = curr.split(operator.assign)[0];
 		// get its possible value
-		let possible = curr.split(operator.equal)[1];
+		let possible = curr.split(operator.assign)[1];
 		// verify and translate the actual option if is in long form
 		actual = get_longform(defined, actual) || actual;
 

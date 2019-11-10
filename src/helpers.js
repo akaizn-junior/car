@@ -66,6 +66,7 @@ function value_or_default(__obj, __key, __default) {
  */
 function add_arg(args, value, success) {
 	const { defined, option } = args;
+
 	// does this option have a help callback
 	const help = value_or_default(defined[option], 'help', function() { });
 	// try to run help if the value is a help option
@@ -73,6 +74,7 @@ function add_arg(args, value, success) {
 	// otherwise just add the value to the valid list
 	valid_args[option] = value;
 	success(valid_args);
+
 	return;
 }
 

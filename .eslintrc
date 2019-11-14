@@ -138,7 +138,7 @@
 
 		"array-bracket-spacing": [2, "never"],
 		"block-spacing": 0,
-		"brace-style": 2,
+		"brace-style": [2, "1tbs", { "allowSingleLine": true }],
 		"camelcase": 0,
 		"comma-spacing": [2, {"before": false, "after": true}],
 		"comma-style": 2,

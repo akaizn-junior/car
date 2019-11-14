@@ -83,7 +83,7 @@ function add_arg(args, value, success) {
  * @param {string} value User input value
  */
 function validate_values(value) {
-	return value.replace(/[><,\\/[\]]+/g, '');
+	return typeof value === 'string' ? value.replace(/[><,\\/[\]]+/g, '') : '';
 }
 
 /**

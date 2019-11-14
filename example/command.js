@@ -8,25 +8,28 @@
 
 const CAR = require('../src/car');
 
-function a_help() {
+const opt_help = (opt, lf) => () => {
 	console.log([
-		'-v       is a command line argument read and validated by CAR based on a defined list provided by the user',
-		'--var    is the long form argument for "-v"'
+		`Help for option ${opt}`,
+		`${opt}	is a command line argument read and validated by CAR based on a defined list provided by the user`,
+		`${lf}	is the long form argument for "${opt}"`
 	].join('\n'));
-}
+};
 
 const DEFINED = {
 	'-v': {
 		var: true,
-		help: a_help,
+		help: opt_help('-v', '--var'),
 		helpOption: 'h',
-		cb: () => console.log('var "-a" option must read a value'),
+		cb: () => console.log('var "-v" option must read a value'),
 		longform: '--var'
 	},
 	'-f': {
 		flag: true,
 		cb: () => console.log('used flag "-f"'),
-		longform: '--flag'
+		longform: '--flag',
+		help: opt_help('-f', '--flag'),
+		helpOption: 'h',
 	},
 	'-c': {
 		flag: true,

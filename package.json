@@ -2,7 +2,7 @@
 	"name": "@verdebydesign/car",
 	"version": "0.0.1",
 	"description": "Command Line Arguments Reader",
-	"main": "src/CAR.js",
+	"main": "src/car.js",
 	"scripts": {
 		"lint": "eslint .",
 		"doc": "jsdoc src/car.js -c jsdoc.json --verbose"

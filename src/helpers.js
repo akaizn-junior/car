@@ -217,6 +217,8 @@ function validator(args, failed) {
 	const len = proc_args.length;
 	// when to start counting possible valid arguments
 	const pos_0 = 2;
+	// add given adds to the output
+	valid_args.args = proc_args;
 
 	// the big loop
 	for (let i = pos_0; i < len; i++) {
@@ -263,7 +265,6 @@ function validator(args, failed) {
 		} else if (!operator[actual]) {
 			// 'actual' is not a thing; skip 'failed' if 'actual' is an operator
 			_failed('invalid argument'.concat(' "', proc_args[i], '"'));
-			end();
 		}
 	}
 

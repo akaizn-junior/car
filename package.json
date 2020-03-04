@@ -7,9 +7,6 @@
 		"lint": "eslint .",
 		"doc": "jsdoc src/car.js -c jsdoc.json --verbose"
 	},
-	"bin": {
-		"command": "./example/command.js"
-	},
 	"author": "Simao Nziaka",
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/",

@@ -207,6 +207,7 @@ function vars(args, possible, failed) {
  * @returns {void}
  */
 function validator(args, failed) {
+	const _failed = failed === 'function' ? failed : () => {};
 	// get overriden methods first
 	validator.validate_values = typeof validator.validate_values === 'function'
 		? validator.validate_values : validate_values;
@@ -242,7 +243,7 @@ function validator(args, failed) {
 		if (actual && defined[actual]) {
 			switch (true) {
 			case defined[actual].var:
-				const result = vars({ defined, proc_args, pos: i }, possible, failed);
+				const result = vars({ defined, proc_args, pos: i }, possible, _failed);
 				if (!result) {
 					// skip a possible value
 					!possible && i++;
@@ -261,7 +262,7 @@ function validator(args, failed) {
 			}
 		} else if (!operator[actual]) {
 			// 'actual' is not a thing; skip 'failed' if 'actual' is an operator
-			failed && typeof failed === 'function' && failed('invalid argument'.concat(' "', proc_args[i], '"'));
+			_failed('invalid argument'.concat(' "', proc_args[i], '"'));
 			end();
 		}
 	}

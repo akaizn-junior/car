@@ -218,7 +218,7 @@ function validator(args, failed) {
 	// when to start counting possible valid arguments
 	const pos_0 = 2;
 	// add given adds to the output
-	valid_args.args = proc_args;
+	valid_args.input = proc_args.slice(2);
 
 	// the big loop
 	for (let i = pos_0; i < len; i++) {

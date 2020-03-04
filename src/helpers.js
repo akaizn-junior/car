@@ -261,7 +261,7 @@ function validator(args, failed) {
 			}
 		} else if (!operator[actual]) {
 			// 'actual' is not a thing; skip 'failed' if 'actual' is an operator
-			failed('invalid argument'.concat(' "', proc_args[i], '"'));
+			failed && typeof failed === 'function' && failed('invalid argument'.concat(' "', proc_args[i], '"'));
 			end();
 		}
 	}

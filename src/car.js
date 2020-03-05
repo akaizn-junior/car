@@ -49,7 +49,6 @@ const { validator } = require('./helpers');
  */
 function CAR(defined, failed = () => {}) {
 	const valid_args = validator({ proc_args: process.argv, defined }, failed);
-	validator.validate_values = CAR.validateValues;
 	return valid_args;
 }
 

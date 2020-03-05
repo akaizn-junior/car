@@ -82,8 +82,8 @@ function add_arg(args, value, success) {
  * Validates user input value
  * @param {string} value User input value
  */
-function validate_values(value) {
-	return typeof value === 'string' ? value.replace(/[><,\\/[\]]+/g, '') : '';
+function is_valid(value) {
+	return typeof value === 'string' ? value.replace(/[><,[\]]+/g, '') : '';
 }
 
 /**
@@ -97,9 +97,7 @@ function validate_values(value) {
 function get_valid_value(args, values, failed) {
 	let { defined, option } = args;
 	const { value, default_value } = values;
-
 	const longform = get_longform(defined);
-	const is_valid = validator.validate_values;
 
 	if (value && is_valid(value)
 		&& !defined[value]
@@ -150,7 +148,7 @@ function eval_value(args, possible, failed) {
 	// translate long form option if read
 	option = get_longform(defined, option) || option;
 
-	// run this callback on sucess
+	// run this callback on success
 	const success = value_or_default(defined[option], 'cb', function() { });
 	// does this var has a default value
 	const default_value = value_or_default(defined[option], 'default', undefined);
@@ -208,9 +206,6 @@ function vars(args, possible, failed) {
  */
 function validator(args, failed) {
 	const _failed = failed === 'function' ? failed : () => {};
-	// get overriden methods first
-	validator.validate_values = typeof validator.validate_values === 'function'
-		? validator.validate_values : validate_values;
 
 	// process args and the defined list
 	const { proc_args, defined } = args;
